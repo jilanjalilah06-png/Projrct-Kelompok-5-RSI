@@ -1,2 +1,2 @@
-# Projrct-Kelompok-5-RSI
+# Project-Kelompok-5-RSI
 Pengumpulan setiap tugas perorang
