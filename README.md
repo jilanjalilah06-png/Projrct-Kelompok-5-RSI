@@ -5,7 +5,7 @@ AgriConnect adalah platform digital berbasis mobile dan web yang dirancang untuk
 ---
 
 # 📌 Latar Belakang
-
+00
 Di era digital saat ini, sektor pertanian masih menghadapi berbagai kendala, seperti:
 
 - Sulitnya pemasaran hasil panen
