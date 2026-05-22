@@ -5,7 +5,7 @@ AgriConnect adalah platform digital berbasis mobile dan web yang dirancang untuk
 ---
 
 # 📌 Latar Belakang
-00
+
 Di era digital saat ini, sektor pertanian masih menghadapi berbagai kendala, seperti:
 
 - Sulitnya pemasaran hasil panen
@@ -73,12 +73,12 @@ AgriConnect hadir sebagai solusi digital untuk membantu proses pertanian menjadi
 
 | Role | Tanggung Jawab |
 |---|---|
-| Project Manager | Mengatur timeline dan koordinasi project |
-| System Analyst | Analisis kebutuhan sistem dan dokumentasi |
-| Frontend Mobile | Pengembangan aplikasi mobile |
-| Frontend Web | Pengembangan website admin |
-| Backend Developer | Pengembangan API dan database |
-| QA/QC | Pengujian sistem dan quality control |
+| Project Manager Jilan Jalilah(20241320039) | Mengatur timeline dan koordinasi project |
+| System Analyst Keysha Aprilya Salsabila(20241320032) | Analisis kebutuhan sistem dan dokumentasi |
+| Frontend Mobile Ridho Gustama(20241320027) | Pengembangan aplikasi mobile |
+| Frontend Web Jopan Maurizt Latue(20241320040) | Pengembangan website admin |
+| Backend Developer Arya Adi Muhammad Iqbal(20241320018) | Pengembangan API dan database |
+| QA/QC Dinda Italia(20241320005) | Pengujian sistem dan quality control |
 
 ---
 
@@ -88,7 +88,7 @@ AgriConnect hadir sebagai solusi digital untuk membantu proses pertanian menjadi
 |---|---|
 | Sprint 1 | Analisis Sistem |
 | Sprint 2 | UI/UX dan Perancangan Sistem |
-| Sprint 3 | Frontend & Backend Development |
+| Sprint 3 | Frontend & Backend Mobile dan Web |
 | Sprint 4 | Testing dan Finalisasi |
 
 ---
