@@ -1,425 +1,581 @@
 import 'package:flutter/material.dart';
-import '../../../core/constanst/agri_colors.dart';
+import 'package:provider/provider.dart';
+import '../../controllers/admin_controller.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
-  static const _stats = [
-    _DashboardStat(
-      title: 'Total Petani',
-      value: '128',
-      sub: '12 baru bulan ini',
-      icon: Icons.agriculture,
-      color: AgriColors.primary,
-    ),
-    _DashboardStat(
-      title: 'Total Pembeli',
-      value: '340',
-      sub: '24 baru bulan ini',
-      icon: Icons.groups_2_outlined,
-      color: Color(0xFF2F80ED),
-    ),
-    _DashboardStat(
-      title: 'Total Order',
-      value: '512',
-      sub: '38 order bulan ini',
-      icon: Icons.shopping_cart_checkout,
-      color: AgriColors.warning,
-    ),
-    _DashboardStat(
-      title: 'Nilai Transaksi',
-      value: 'Rp 48jt',
-      sub: 'Akumulasi bulan ini',
-      icon: Icons.payments_outlined,
-      color: AgriColors.success,
-    ),
-  ];
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
 
-  static const _bars = [
-    _ChartBarData(label: 'Jan', transaksi: 24, panen: 18),
-    _ChartBarData(label: 'Feb', transaksi: 31, panen: 22),
-    _ChartBarData(label: 'Mar', transaksi: 28, panen: 25),
-    _ChartBarData(label: 'Apr', transaksi: 39, panen: 32),
-    _ChartBarData(label: 'Mei', transaksi: 45, panen: 38),
-    _ChartBarData(label: 'Jun', transaksi: 33, panen: 29),
-  ];
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  // Green theme colors
+  static const Color _green = Color(0xFF1B3A2D);
+  static const Color _greenAccent = Color(0xFF2D6A4F);
+  static const Color _greenLight = Color(0xFF74C69D);
+  static const Color _cardBg = Colors.white;
+  static const Color _bg = Color(0xFFF8FAF8);
+  static const Color _textDark = Color(0xFF1D2939);
+  static const Color _textMuted = Color(0xFF667085);
 
-  static const _activities = [
-    ['05 Jun 2026 10:32', 'Budi Santoso', 'Tambah hasil panen Padi 120kg', 'Sukses'],
-    ['05 Jun 2026 09:15', 'Siti Aminah', 'Buat order #ORD-001', 'Sukses'],
-    ['05 Jun 2026 08:00', 'Admin', 'Update harga referensi Padi', 'Sukses'],
-    ['04 Jun 2026 18:30', 'Rudi Hartono', 'Konfirmasi pembayaran #ORD-002', 'Pending'],
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AdminController>().loadDashboard();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final admin = context.watch<AdminController>();
+    final data = admin.dashboard;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: _bg,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Section header
             const Text(
-              'Dashboard',
+              'OVERVIEW',
+              style: TextStyle(
+                color: _greenAccent,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Ringkasan Statistik',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AgriColors.textDark,
+                color: _textDark,
               ),
             ),
             const SizedBox(height: 20),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isTight = constraints.maxWidth < 900;
-                return Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: _stats
-                      .map(
-                        (stat) => SizedBox(
-                          width: isTight
-                              ? (constraints.maxWidth - 16) / 2
-                              : (constraints.maxWidth - 48) / 4,
-                          child: _StatCard(stat: stat),
-                        ),
-                      )
-                      .toList(),
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: _cardDecor(),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tren Transaksi & Panen 6 Bulan',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: AgriColors.textDark,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Row(
+
+            if (admin.loading && data == null)
+              const Center(child: CircularProgressIndicator())
+            else if (admin.error != null && data == null)
+              _ErrorPanel(
+                message: admin.error!,
+                onRetry: () => context.read<AdminController>().loadDashboard(),
+              )
+            else ...[
+              // ── 4 Stat Cards ─────────────────────────────
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isTight = constraints.maxWidth < 900;
+                  return Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
                     children: [
-                      _Legend(color: AgriColors.primaryDark, label: 'Transaksi'),
-                      SizedBox(width: 16),
-                      _Legend(color: AgriColors.primaryLight, label: 'Panen'),
-                    ],
-                  ),
-                  SizedBox(height: 22),
-                  SizedBox(height: 240, child: _DashboardBarChart(data: _bars)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: _cardDecor(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Aktivitas Terbaru',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: AgriColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      headingRowColor: MaterialStateProperty.all(
-                        const Color(0xFFF9FAFB),
+                      SizedBox(
+                        width: isTight
+                            ? (constraints.maxWidth - 16) / 2
+                            : (constraints.maxWidth - 48) / 4,
+                        child: _StatCard(
+                          label: 'KELOLA USER',
+                          value: data?.totalPetani != null
+                              ? (data!.totalPetani + data.totalPembeli).toString()
+                              : '120',
+                          subtitle: '+8% minggu ini',
+                          icon: Icons.people_alt_outlined,
+                          iconBgColor: const Color(0xFF3B5998),
+                        ),
                       ),
-                      columns: const [
-                        DataColumn(label: Text('Waktu')),
-                        DataColumn(label: Text('User')),
-                        DataColumn(label: Text('Aktivitas')),
-                        DataColumn(label: Text('Status')),
-                      ],
-                      rows: _activities
-                          .map(
-                            (row) => DataRow(
-                              cells: [
-                                DataCell(Text(row[0])),
-                                DataCell(Text(row[1])),
-                                DataCell(Text(row[2])),
-                                DataCell(_StatusBadge(label: row[3])),
-                              ],
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                ],
+                      SizedBox(
+                        width: isTight
+                            ? (constraints.maxWidth - 16) / 2
+                            : (constraints.maxWidth - 48) / 4,
+                        child: _StatCard(
+                          label: 'TOTAL ORDER',
+                          value: data?.totalOrders.toString() ?? '345',
+                          subtitle: '+12% minggu ini',
+                          icon: Icons.checklist_outlined,
+                          iconBgColor: _greenAccent,
+                        ),
+                      ),
+                      SizedBox(
+                        width: isTight
+                            ? (constraints.maxWidth - 16) / 2
+                            : (constraints.maxWidth - 48) / 4,
+                        child: _StatCard(
+                          label: 'STOK TERSEDIA',
+                          value: '10',
+                          subtitle: null,
+                          icon: Icons.inventory_2_outlined,
+                          iconBgColor: const Color(0xFF5C6BC0),
+                        ),
+                      ),
+                      SizedBox(
+                        width: isTight
+                            ? (constraints.maxWidth - 16) / 2
+                            : (constraints.maxWidth - 48) / 4,
+                        child: _StatCard(
+                          label: 'USER AKTIF',
+                          value: '98',
+                          subtitle: '+5% minggu ini',
+                          icon: Icons.trending_up,
+                          iconBgColor: _greenAccent,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
-            ),
+              const SizedBox(height: 24),
+
+              // ── Line Chart: Data User Aktif ────────────────
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: _cardDecor(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Data User Aktif',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: _textDark,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Mingguan — Jun 2025',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: _textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: const Color(0xFFD0D5DD)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            '7 Hari Terakhir',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: _textDark,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 200,
+                      child: _UserActivityLineChart(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // ── Aktivitas Terbaru Table ──────────────────
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: _cardDecor(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Aktivitas Terbaru',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: _textDark,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {},
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Lihat Semua',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: _textMuted,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(Icons.chevron_right, size: 18, color: _textMuted),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        headingRowColor: WidgetStateProperty.all(
+                          const Color(0xFFF9FAFB),
+                        ),
+                        columns: const [
+                          DataColumn(
+                            label: Text(
+                              'USER',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _textMuted,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'AKTIVITAS',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _textMuted,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'ROLE',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _textMuted,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'WAKTU',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _textMuted,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'STATUS',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _textMuted,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                        rows: [
+                          _buildActivityRow('Budi Santoso', 'Order Baru', 'Vendor', '17 Jun 2025', 'Sukses'),
+                          _buildActivityRow('Siti Rahayu', 'Tambah Produk', 'Admin', '23 Jun 2025', 'Sukses'),
+                          _buildActivityRow('Ahmad Fauzi', 'Login', 'User', '23 Jun 2025', 'Pending'),
+                          _buildActivityRow('Dewi Lestari', 'Order Baru', 'Vendor', '22 Jun 2025', 'Gagal'),
+                          _buildActivityRow('Rudi Hermawan', 'Daftar', 'User', '21 Jun 2025', 'Sukses'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
+
+  static DataRow _buildActivityRow(String user, String activity, String role, String time, String status) {
+    return DataRow(cells: [
+      DataCell(Text(user, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
+      DataCell(Text(activity, style: const TextStyle(fontSize: 13))),
+      DataCell(_RoleBadge(role)),
+      DataCell(Text(time, style: const TextStyle(fontSize: 13, color: Color(0xFF667085)))),
+      DataCell(_StatusBadge(status)),
+    ]);
+  }
 }
 
-class _DashboardStat {
-  final String title, value, sub;
-  final IconData icon;
-  final Color color;
-  const _DashboardStat({
-    required this.title,
-    required this.value,
-    required this.sub,
-    required this.icon,
-    required this.color,
-  });
-}
+// ── Stat Card ─────────────────────────────────────
 
 class _StatCard extends StatelessWidget {
-  final _DashboardStat stat;
-  const _StatCard({required this.stat});
+  final String label;
+  final String value;
+  final String? subtitle;
+  final IconData icon;
+  final Color iconBgColor;
+
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.subtitle,
+    required this.icon,
+    required this.iconBgColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 132),
-      padding: const EdgeInsets.all(18),
-      decoration: _cardDecor(),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: stat.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(stat.icon, color: stat.color, size: 24),
+      constraints: const BoxConstraints(minHeight: 140),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE4E7EC)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF667085),
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: Colors.white, size: 20),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1D2939),
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 6),
+            Row(
               children: [
+                const Icon(Icons.trending_up, size: 14, color: Color(0xFF2D6A4F)),
+                const SizedBox(width: 4),
                 Text(
-                  stat.title,
+                  subtitle!,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AgriColors.textLight,
+                    color: Color(0xFF2D6A4F),
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  stat.value,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: stat.color,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  stat.sub,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Line Chart: User Activity ─────────────────────
+
+class _UserActivityLineChart extends StatelessWidget {
+  // Dummy data matching the screenshot
+  final List<double> data = const [0.40, 0.55, 0.70, 0.65, 0.55, 0.35, 0.95];
+  final List<String> labels = const ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _LineChartPainter(data: data),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: labels
+            .map(
+              (l) => Padding(
+                padding: const EdgeInsets.only(top: 185),
+                child: Text(
+                  l,
                   style: const TextStyle(
                     fontSize: 11,
-                    color: AgriColors.textLight,
+                    color: Color(0xFF667085),
                   ),
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            )
+            .toList(),
       ),
     );
   }
 }
 
-class _ChartBarData {
-  final String label;
-  final int transaksi;
-  final int panen;
-  const _ChartBarData({
-    required this.label,
-    required this.transaksi,
-    required this.panen,
-  });
-}
-
-class _DashboardBarChart extends StatelessWidget {
-  final List<_ChartBarData> data;
-  const _DashboardBarChart({required this.data});
+class _LineChartPainter extends CustomPainter {
+  final List<double> data;
+  const _LineChartPainter({required this.data});
 
   @override
-  Widget build(BuildContext context) {
-    final maxValue = data
-        .expand((item) => [item.transaksi, item.panen])
-        .reduce((a, b) => a > b ? a : b);
+  void paint(Canvas canvas, Size size) {
+    final h = size.height - 20;
+    final step = size.width / (data.length - 1);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: data
-              .map(
-                (item) => _MonthBarGroup(
-                  data: item,
-                  maxValue: maxValue,
-                  maxHeight: constraints.maxHeight - 38,
-                ),
-              )
-              .toList(),
-        );
-      },
-    );
-  }
-}
+    // Grid lines
+    final gridPaint = Paint()
+      ..color = const Color(0xFFE4E7EC)
+      ..strokeWidth = 0.5;
 
-class _MonthBarGroup extends StatelessWidget {
-  final _ChartBarData data;
-  final int maxValue;
-  final double maxHeight;
+    for (int i = 0; i <= 4; i++) {
+      final y = h - (i / 4 * h);
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    }
 
-  const _MonthBarGroup({
-    required this.data,
-    required this.maxValue,
-    required this.maxHeight,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 86,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _ValueBar(
-                  value: data.transaksi,
-                  maxValue: maxValue,
-                  maxHeight: maxHeight,
-                  color: AgriColors.primaryDark,
-                ),
-                const SizedBox(width: 8),
-                _ValueBar(
-                  value: data.panen,
-                  maxValue: maxValue,
-                  maxHeight: maxHeight,
-                  color: AgriColors.primaryLight,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            data.label,
-            style: const TextStyle(fontSize: 11, color: AgriColors.textLight),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ValueBar extends StatelessWidget {
-  final int value;
-  final int maxValue;
-  final double maxHeight;
-  final Color color;
-
-  const _ValueBar({
-    required this.value,
-    required this.maxValue,
-    required this.maxHeight,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final height = maxHeight * value / maxValue;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(
-          value.toString(),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: AgriColors.textDark,
-          ),
+    // Y-axis labels
+    for (int i = 0; i <= 4; i++) {
+      final y = h - (i / 4 * h);
+      final label = (i * 25).toString();
+      final tp = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: const TextStyle(fontSize: 10, color: Color(0xFF667085)),
         ),
-        const SizedBox(height: 4),
-        Container(
-          width: 24,
-          height: height,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
-          ),
-        ),
-      ],
-    );
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, Offset(-2, y - tp.height / 2));
+    }
+
+    // Line
+    final paint = Paint()
+      ..color = const Color(0xFF2D6A4F)
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke;
+
+    final fillPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0x332D6A4F), Color(0x002D6A4F)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, h));
+
+    final dotPaint = Paint()
+      ..color = const Color(0xFF2D6A4F)
+      ..style = PaintingStyle.fill;
+
+    final dotBorderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    final fillPath = Path();
+
+    for (int i = 0; i < data.length; i++) {
+      final x = i * step;
+      final y = h - (data[i] * h);
+      if (i == 0) {
+        path.moveTo(x, y);
+        fillPath.moveTo(x, h);
+        fillPath.lineTo(x, y);
+      } else {
+        path.lineTo(x, y);
+        fillPath.lineTo(x, y);
+      }
+    }
+
+    // Close fill path
+    fillPath.lineTo((data.length - 1) * step, h);
+    fillPath.close();
+    canvas.drawPath(fillPath, fillPaint);
+    canvas.drawPath(path, paint);
+
+    // Draw dots
+    for (int i = 0; i < data.length; i++) {
+      final x = i * step;
+      final y = h - (data[i] * h);
+      canvas.drawCircle(Offset(x, y), 5, dotBorderPaint);
+      canvas.drawCircle(Offset(x, y), 4, dotPaint);
+    }
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-class _Legend extends StatelessWidget {
-  final Color color;
-  final String label;
-  const _Legend({required this.color, required this.label});
+// ── Role Badge ────────────────────────────────────
+
+class _RoleBadge extends StatelessWidget {
+  final String role;
+  const _RoleBadge(this.role);
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: AgriColors.textLight),
-        ),
-      ],
-    );
-  }
-}
+    Color bgColor;
+    Color textColor;
 
-class _StatusBadge extends StatelessWidget {
-  final String label;
-  const _StatusBadge({required this.label});
+    switch (role) {
+      case 'Admin':
+        bgColor = const Color(0xFF2D6A4F);
+        textColor = Colors.white;
+        break;
+      case 'Vendor':
+        bgColor = const Color(0xFFD4EDDA);
+        textColor = const Color(0xFF2D6A4F);
+        break;
+      default:
+        bgColor = const Color(0xFFF2F4F7);
+        textColor = const Color(0xFF344054);
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    final color = label == 'Sukses' ? AgriColors.success : AgriColors.warning;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        label,
+        role,
         style: TextStyle(
-          color: color,
+          color: textColor,
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),
@@ -428,12 +584,97 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
+// ── Status Badge ──────────────────────────────────
+
+class _StatusBadge extends StatelessWidget {
+  final String label;
+  const _StatusBadge(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    Color color;
+    IconData icon;
+
+    switch (label) {
+      case 'Sukses':
+        color = const Color(0xFF12B76A);
+        icon = Icons.check_circle_outline;
+        break;
+      case 'Pending':
+        color = const Color(0xFFF79009);
+        icon = Icons.access_time;
+        break;
+      case 'Gagal':
+        color = const Color(0xFFF04438);
+        icon = Icons.cancel_outlined;
+        break;
+      default:
+        color = const Color(0xFF667085);
+        icon = Icons.info_outline;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Error Panel ───────────────────────────────────
+
+class _ErrorPanel extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorPanel({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: _cardDecor(),
+      child: Column(
+        children: [
+          Text(message, style: const TextStyle(color: Color(0xFFF04438))),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2D6A4F),
+            ),
+            onPressed: onRetry,
+            child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 BoxDecoration _cardDecor() => BoxDecoration(
   color: Colors.white,
-  borderRadius: BorderRadius.circular(12),
+  borderRadius: BorderRadius.circular(16),
+  border: Border.all(color: const Color(0xFFE4E7EC)),
   boxShadow: [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.05),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 10,
       offset: const Offset(0, 3),
     ),

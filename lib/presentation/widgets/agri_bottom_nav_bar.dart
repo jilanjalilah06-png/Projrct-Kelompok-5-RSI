@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constanst/agri_colors.dart';
-
 class AgriBottomNavItem {
   final IconData icon;
   final IconData activeIcon;
@@ -28,6 +26,9 @@ class AgriBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const activeColor = Color(0xFF159447);
+    const inactiveColor = Color(0xFF98A2B3);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -55,36 +56,38 @@ class AgriBottomNavBar extends StatelessWidget {
                     duration: const Duration(milliseconds: 180),
                     height: 54,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AgriColors.primary.withValues(alpha: 0.1)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          selected ? item.activeIcon : item.icon,
-                          size: 22,
-                          color: selected
-                              ? AgriColors.primary
-                              : AgriColors.textLight,
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: 40,
+                          height: 32,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? activeColor.withValues(alpha: 0.16)
+                                : Colors.transparent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            selected ? item.activeIcon : item.icon,
+                            size: 24,
+                            color: selected ? activeColor : inactiveColor,
+                          ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 2),
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
                             item.label,
                             maxLines: 1,
                             style: TextStyle(
-                              color: selected
-                                  ? AgriColors.primary
-                                  : AgriColors.textLight,
-                              fontSize: 11,
+                              color: selected ? activeColor : inactiveColor,
+                              fontSize: 14,
                               fontWeight: selected
                                   ? FontWeight.w700
-                                  : FontWeight.w500,
+                                  : FontWeight.w600,
                             ),
                           ),
                         ),

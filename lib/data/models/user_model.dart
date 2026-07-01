@@ -11,6 +11,7 @@ class UserModel {
   final String? address;
   final String? avatar;
   final bool isVerified;
+  final bool isActive;
   final String? shopName;
   final String? shopDescription;
   final DateTime? createdAt;
@@ -25,6 +26,7 @@ class UserModel {
     this.address,
     this.avatar,
     required this.isVerified,
+    required this.isActive,
     this.shopName,
     this.shopDescription,
     this.createdAt,
@@ -41,6 +43,7 @@ class UserModel {
       address: json['address'] as String?,
       avatar: json['avatar'] as String?,
       isVerified: json['is_verified'] as bool? ?? false,
+      isActive: json['is_active'] as bool? ?? true,
       shopName: json['shop_name'] as String?,
       shopDescription: json['shop_description'] as String?,
       createdAt: json['created_at'] != null
@@ -62,6 +65,7 @@ class UserModel {
       'address': address,
       'avatar': avatar,
       'is_verified': isVerified,
+      'is_active': isActive,
       'shop_name': shopName,
       'shop_description': shopDescription,
       'created_at': createdAt?.toIso8601String(),
@@ -78,6 +82,7 @@ class UserModel {
     String? address,
     String? avatar,
     bool? isVerified,
+    bool? isActive,
     String? shopName,
     String? shopDescription,
     DateTime? createdAt,
@@ -92,6 +97,7 @@ class UserModel {
       address: address ?? this.address,
       avatar: avatar ?? this.avatar,
       isVerified: isVerified ?? this.isVerified,
+      isActive: isActive ?? this.isActive,
       shopName: shopName ?? this.shopName,
       shopDescription: shopDescription ?? this.shopDescription,
       createdAt: createdAt ?? this.createdAt,

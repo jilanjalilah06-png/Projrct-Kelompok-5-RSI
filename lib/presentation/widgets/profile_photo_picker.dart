@@ -15,6 +15,10 @@ class ProfilePhotoPicker extends StatefulWidget {
   final ValueChanged<Uint8List>? onPreviewChanged;
   final Uint8List? initialBytes;
   final String? initialImagePath;
+  final Color? avatarBackgroundColor;
+  final Color? avatarIconColor;
+  final Color? cameraBackgroundColor;
+  final Color? cameraIconColor;
 
   const ProfilePhotoPicker({
     super.key,
@@ -24,6 +28,10 @@ class ProfilePhotoPicker extends StatefulWidget {
     this.onPreviewChanged,
     this.initialBytes,
     this.initialImagePath,
+    this.avatarBackgroundColor,
+    this.avatarIconColor,
+    this.cameraBackgroundColor,
+    this.cameraIconColor,
   });
 
   @override
@@ -130,8 +138,8 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
     final ImageProvider? profileImage = _previewBytes != null
         ? MemoryImage(_previewBytes!)
         : imagePath == null || imagePath.isEmpty
-            ? null
-            : NetworkImage('${ApiConstants.storageUrl}/$imagePath');
+        ? null
+        : NetworkImage('${ApiConstants.storageUrl}/$imagePath');
 
     return Semantics(
       button: true,
@@ -147,13 +155,15 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
             children: [
               CircleAvatar(
                 radius: widget.radius,
-                backgroundColor: AgriColors.primary.withValues(alpha: 0.15),
+                backgroundColor:
+                    widget.avatarBackgroundColor ??
+                    AgriColors.primary.withValues(alpha: 0.15),
                 backgroundImage: profileImage,
                 child: profileImage == null
-                    ? const Icon(
+                    ? Icon(
                         Icons.person,
                         size: 42,
-                        color: AgriColors.primary,
+                        color: widget.avatarIconColor ?? AgriColors.primary,
                       )
                     : null,
               ),
@@ -163,8 +173,8 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
                 child: Container(
                   width: 28,
                   height: 28,
-                  decoration: const BoxDecoration(
-                    color: AgriColors.primary,
+                  decoration: BoxDecoration(
+                    color: widget.cameraBackgroundColor ?? AgriColors.primary,
                     shape: BoxShape.circle,
                   ),
                   child: _isUploading
@@ -175,9 +185,9 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
                             color: Colors.white,
                           ),
                         )
-                      : const Icon(
+                      : Icon(
                           Icons.camera_alt,
-                          color: Colors.white,
+                          color: widget.cameraIconColor ?? Colors.white,
                           size: 15,
                         ),
                 ),

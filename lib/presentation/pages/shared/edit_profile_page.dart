@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constanst/agri_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../controllers/auth_controller.dart';
 import '../../widgets/profile_photo_picker.dart';
@@ -29,6 +28,15 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
+  static const _deepGreen = Color(0xFF195912);
+  static const _leafGreen = Color(0xFF2B6D20);
+  static const _fieldGreen = Color(0xFF8FBE78);
+  static const _softGreen = Color(0xFFEAF4E8);
+  static const _cream = Color(0xFFFBF7EF);
+  static const _gold = Color(0xFFFFA51A);
+  static const _olive = Color(0xFF848B35);
+  static const _textGreen = Color(0xFF286627);
+
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _phoneController;
@@ -59,93 +67,231 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final name = widget.user?.name.trim().isNotEmpty == true
+        ? widget.user!.name
+        : 'Budi Santoso';
+    final role = (widget.user?.role ?? widget.roleLabel)
+        .replaceFirst('Profil ', '')
+        .toUpperCase();
+    final roleTitle = widget.title.replaceFirst('Edit ', '');
+    final isVerified = widget.user?.isVerified ?? true;
+    final since = widget.user?.createdAt?.year.toString() ?? '2019';
+
     return Scaffold(
-      backgroundColor: AgriColors.background,
-      appBar: AppBar(
-        backgroundColor: AgriColors.primary,
-        foregroundColor: Colors.white,
-        title: Text(widget.title),
-        elevation: 0,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+      backgroundColor: Colors.white,
+      body: Stack(
         children: [
-          Center(
+          Container(height: 420, color: _deepGreen),
+          Positioned(
+            top: -76,
+            right: -48,
+            child: _LeafShape(
+              width: 148,
+              height: 310,
+              angle: -0.08,
+              color: Colors.white.withValues(alpha: 0.06),
+            ),
+          ),
+          Positioned(
+            top: 34,
+            left: -88,
+            child: _LeafShape(
+              width: 96,
+              height: 245,
+              angle: -0.22,
+              color: Colors.white.withValues(alpha: 0.07),
+            ),
+          ),
+          Positioned(top: 328, left: 60, child: _Dot(size: 6, opacity: 0.06)),
+          Positioned(top: 350, right: 92, child: _Dot(size: 8, opacity: 0.07)),
+          SafeArea(
+            bottom: false,
             child: Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+                  child: _TopBar(
+                    title: roleTitle,
+                    onBack: () => Navigator.maybePop(context),
+                  ),
+                ),
+                const SizedBox(height: 36),
                 ProfilePhotoPicker(
-                  radius: 48,
-                  uploadContext: widget.roleLabel,
+                  radius: 68,
+                  uploadContext: widget.roleLabel.toLowerCase(),
                   initialBytes: _photoBytes,
                   initialImagePath: widget.user?.avatar,
+                  avatarBackgroundColor: _olive,
+                  avatarIconColor: Colors.white.withValues(alpha: 0.82),
+                  cameraBackgroundColor: _gold,
                   onPreviewChanged: (bytes) {
                     setState(() => _photoBytes = bytes);
                     widget.onPhotoChanged?.call(bytes);
                   },
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 14),
                 Text(
-                  widget.roleLabel,
+                  name,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: AgriColors.textLight,
-                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontFamily: 'serif',
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  role,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.68),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 2.7,
+                  ),
+                ),
+                const SizedBox(height: 38),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(22),
+                      ),
+                    ),
+                    child: ListView(
+                      padding: EdgeInsets.fromLTRB(
+                        14,
+                        26,
+                        14,
+                        bottomInset + 24,
+                      ),
+                      children: [
+                        Center(
+                          child: _VerifiedBadge(
+                            label: isVerified
+                                ? '$role TERVERIFIKASI'
+                                : '$role BELUM TERVERIFIKASI',
+                          ),
+                        ),
+                        const SizedBox(height: 26),
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: _StatCard(
+                                value: '3.2 Ha',
+                                label: 'Lahan Aktif',
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 68,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              color: const Color(0xFFE2ECE0),
+                            ),
+                            const Expanded(
+                              child: _StatCard(
+                                value: '4x',
+                                label: 'Musim Panen',
+                                highlighted: true,
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 68,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              color: const Color(0xFFE2ECE0),
+                            ),
+                            Expanded(
+                              child: _StatCard(value: since, label: 'Sejak'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 22),
+                        const Divider(height: 1, color: Color(0xFFE7EEE5)),
+                        const SizedBox(height: 24),
+                        _field(
+                          controller: _nameController,
+                          label: 'NAMA LENGKAP',
+                          icon: Icons.person_outline,
+                        ),
+                        const SizedBox(height: 22),
+                        _field(
+                          controller: _emailController,
+                          label: 'ALAMAT EMAIL',
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: 22),
+                        _field(
+                          controller: _phoneController,
+                          label: 'NOMOR TELEPON',
+                          icon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        const SizedBox(height: 22),
+                        _field(
+                          controller: _addressController,
+                          label: 'ALAMAT',
+                          icon: Icons.location_on_outlined,
+                        ),
+                        const SizedBox(height: 30),
+                        SizedBox(
+                          height: 78,
+                          child: ElevatedButton.icon(
+                            onPressed: _saving ? null : _saveProfile,
+                            icon: _saving
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.4,
+                                    ),
+                                  )
+                                : const Icon(Icons.eco_outlined, size: 24),
+                            label: const Text('Simpan Perubahan'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _leafGreen,
+                              disabledBackgroundColor: _leafGreen.withValues(
+                                alpha: 0.62,
+                              ),
+                              foregroundColor: Colors.white,
+                              elevation: 10,
+                              shadowColor: _leafGreen.withValues(alpha: 0.24),
+                              textStyle: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(22),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          'Data Anda dilindungi & aman - AgriConnect 2026',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _fieldGreen,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          _field(
-            controller: _nameController,
-            label: 'Nama Lengkap',
-            icon: Icons.person_outline,
-          ),
-          const SizedBox(height: 14),
-          _field(
-            controller: _emailController,
-            label: 'Email',
-            icon: Icons.email_outlined,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 14),
-          _field(
-            controller: _phoneController,
-            label: 'Nomor Telepon',
-            icon: Icons.phone_outlined,
-            keyboardType: TextInputType.phone,
-          ),
-          const SizedBox(height: 14),
-          _field(
-            controller: _addressController,
-            label: 'Alamat',
-            icon: Icons.location_on_outlined,
-            maxLines: 3,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 50,
-            child: ElevatedButton(
-              onPressed: _saving ? null : _saveProfile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AgriColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: _saving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      'Simpan Perubahan',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
             ),
           ),
         ],
@@ -158,30 +304,61 @@ class _EditProfilePageState extends State<EditProfilePage> {
     required String label,
     required IconData icon,
     TextInputType? keyboardType,
-    int maxLines = 1,
   }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: _textGreen,
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2.6,
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+        const SizedBox(height: 12),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 23,
+            fontWeight: FontWeight.w500,
+          ),
+          decoration: InputDecoration(
+            prefixIcon: Padding(
+              padding: const EdgeInsets.only(left: 18, right: 12),
+              child: Icon(icon, color: _fieldGreen, size: 26),
+            ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 62),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 22,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: const BorderSide(
+                color: Color(0xFFD6E8D1),
+                width: 1.6,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: const BorderSide(
+                color: Color(0xFFD6E8D1),
+                width: 1.6,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: const BorderSide(color: _fieldGreen, width: 1.8),
+            ),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AgriColors.primary, width: 1.4),
-        ),
-      ),
+      ],
     );
   }
 
@@ -213,5 +390,225 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (ok) {
       Navigator.pop(context);
     }
+  }
+}
+
+class _TopBar extends StatelessWidget {
+  final String title;
+  final VoidCallback onBack;
+
+  const _TopBar({required this.title, required this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _CircleIconButton(
+          icon: Icons.chevron_left,
+          tooltip: 'Kembali',
+          onPressed: onBack,
+        ),
+        const SizedBox(width: 16),
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(Icons.eco_outlined, color: Colors.white, size: 24),
+        ),
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Text(
+            'AgriConnect',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        Text(
+          title,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.72),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CircleIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _CircleIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.white, size: 32),
+      style: IconButton.styleFrom(
+        fixedSize: const Size(54, 54),
+        backgroundColor: Colors.white.withValues(alpha: 0.14),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+    );
+  }
+}
+
+class _VerifiedBadge extends StatelessWidget {
+  final String label;
+
+  const _VerifiedBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: _EditProfilePageState._softGreen,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0xFFC9DEC3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.shield_outlined,
+            size: 18,
+            color: _EditProfilePageState._leafGreen,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: _EditProfilePageState._leafGreen,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String value;
+  final String label;
+  final bool highlighted;
+
+  const _StatCard({
+    required this.value,
+    required this.label,
+    this.highlighted = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 98,
+      decoration: BoxDecoration(
+        color: highlighted
+            ? _EditProfilePageState._cream
+            : const Color(0xFFF1F6F1),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: highlighted
+                  ? _EditProfilePageState._gold
+                  : _EditProfilePageState._textGreen,
+              fontSize: 24,
+              fontFamily: 'serif',
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: _EditProfilePageState._textGreen,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeafShape extends StatelessWidget {
+  final double width;
+  final double height;
+  final double angle;
+  final Color color;
+
+  const _LeafShape({
+    required this.width,
+    required this.height,
+    required this.angle,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: angle,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(width),
+            topRight: Radius.circular(width * 0.6),
+            bottomLeft: Radius.circular(width * 0.55),
+            bottomRight: Radius.circular(width),
+          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        ),
+      ),
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  final double size;
+  final double opacity;
+
+  const _Dot({required this.size, required this.opacity});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: opacity),
+        shape: BoxShape.circle,
+      ),
+    );
   }
 }

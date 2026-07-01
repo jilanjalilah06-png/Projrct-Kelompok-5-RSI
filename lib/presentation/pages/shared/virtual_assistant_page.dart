@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constanst/agri_colors.dart';
+import 'package:provider/provider.dart';
+
 import '../../../data/services/api_service.dart';
-import '../../widgets/agri_asisten_bot_widget.dart'; // reuse TypingIndicatorDots
+import '../../widgets/agri_asisten_bot_widget.dart';
 
 class VirtualAssistantPage extends StatefulWidget {
   final bool showBackButton;
@@ -20,13 +20,12 @@ class VirtualAssistantPage extends StatefulWidget {
 }
 
 class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
-  final List<Map<String, String>> _messages = [
-    {
-      'sender': 'bot',
-      'text':
-          'Halo! Saya **Agri Asisten Bot** 🌾. Ada yang bisa saya bantu untuk produktivitas pertanian Anda hari ini? Tanggapan saya disesuaikan dengan data real-time platform AgriConnect!',
-    },
-  ];
+  static const _green = Color(0xFF2D832F);
+  static const _background = Color(0xFFEFF8EF);
+  static const _title = Color(0xFF001A3D);
+  static const _muted = Color(0xFF98A2B3);
+
+  late final List<Map<String, String>> _messages;
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
@@ -35,56 +34,13 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
   void initState() {
     super.initState();
     final role = widget.roleContext ?? 'Pengguna';
-    _messages[0]['text'] =
-        'Halo! Saya **Agri Asisten Bot**. Saat ini konteks Anda: **$role**. Ada yang bisa saya bantu di AgriConnect?';
-  }
-
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  Future<void> _sendMessage(String text) async {
-    if (text.trim().isEmpty) return;
-
-    setState(() {
-      _messages.add({'sender': 'user', 'text': text});
-      _isTyping = true;
-    });
-    _inputController.clear();
-    _scrollToBottom();
-
-    final apiService = Provider.of<ApiService>(context, listen: false);
-
-    try {
-      final response = await apiService.sendChatbotMessage(text);
-      setState(() {
-        _messages.add({
-          'sender': 'bot',
-          'text': response['reply'] ?? 'Maaf, saya tidak menerima balasan.',
-        });
-      });
-    } catch (e) {
-      setState(() {
-        _messages.add({
-          'sender': 'bot',
-          'text':
-              'Maaf, terjadi gangguan koneksi. Berikut bantuan cepat offline:\n\n• Ketik "*stok*" untuk melihat produk.\n• Ketik "*petani*" untuk melihat daftar mitra.\n• Ketik "*fitur*" untuk info menu.',
-        });
-      });
-    } finally {
-      setState(() {
-        _isTyping = false;
-      });
-      _scrollToBottom();
-    }
+    _messages = [
+      {
+        'sender': 'bot',
+        'text':
+            'Halo! Saya **Agri Asisten Bot**. Saat ini konteks Anda: **$role**. Ada yang bisa saya bantu di AgriConnect?',
+      },
+    ];
   }
 
   @override
@@ -94,20 +50,59 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
     super.dispose();
   }
 
+  Future<void> _sendMessage(String text) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
+
+    setState(() {
+      _messages.add({'sender': 'user', 'text': trimmed});
+      _isTyping = true;
+    });
+    _inputController.clear();
+    _scrollToBottom();
+
+    final apiService = Provider.of<ApiService>(context, listen: false);
+
+    try {
+      final response = await apiService.sendChatbotMessage(trimmed);
+      setState(() {
+        _messages.add({
+          'sender': 'bot',
+          'text': response['reply'] ?? 'Maaf, saya tidak menerima balasan.',
+        });
+      });
+    } catch (_) {
+      setState(() {
+        _messages.add({
+          'sender': 'bot',
+          'text':
+              'Maaf, terjadi gangguan koneksi. Bantuan cepat: ketik "stok", "jadwal", "produk", atau "fitur".',
+        });
+      });
+    } finally {
+      setState(() => _isTyping = false);
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AgriColors.background,
+      backgroundColor: _background,
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AgriColors.primary, AgriColors.primaryDark],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        backgroundColor: _green,
+        elevation: 0,
         leading: widget.showBackButton
             ? IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -117,7 +112,7 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundColor: Colors.white.withValues(alpha: 0.25),
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
               radius: 18,
               child: const Icon(Icons.smart_toy, color: Colors.white, size: 20),
             ),
@@ -132,29 +127,16 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
                     style: GoogleFonts.outfit(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: Colors.greenAccent,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Online - ${widget.roleContext ?? "AgriConnect"}',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white70,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'Online - ${widget.roleContext ?? "AgriConnect"}',
+                    style: GoogleFonts.outfit(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -165,55 +147,56 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Chat Message List
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
-                  final msg = _messages[index];
-                  return _buildChatBubble(
-                    msg['sender'] == 'user',
-                    msg['text']!,
+                  final message = _messages[index];
+                  return _ChatBubble(
+                    isUser: message['sender'] == 'user',
+                    text: message['text']!,
                   );
                 },
               ),
             ),
-
-            // Quick suggestion chips
-            if (_messages.length <= 2 && !_isTyping) _buildSuggestions(),
-
-            // Typing Dots
+            if (_messages.length <= 2 && !_isTyping)
+              _Suggestions(onSelected: _sendMessage),
             if (_isTyping)
-              Padding(
-                padding: const EdgeInsets.all(16),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 12),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor: Colors.grey.shade200,
-                      radius: 12,
-                      child: const Icon(
-                        Icons.smart_toy,
-                        color: AgriColors.primary,
-                        size: 14,
-                      ),
+                      backgroundColor: Color(0xFFD7FBE5),
+                      radius: 13,
+                      child: Icon(Icons.smart_toy, color: _green, size: 15),
                     ),
-                    const SizedBox(width: 8),
-                    const TypingIndicatorDots(),
+                    SizedBox(width: 8),
+                    TypingIndicatorDots(),
                   ],
                 ),
               ),
-
-            // Input bottom bar
-            _buildInputBar(),
+            _InputBar(
+              controller: _inputController,
+              onSubmitted: _sendMessage,
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildChatBubble(bool isUser, String text) {
+class _ChatBubble extends StatelessWidget {
+  final bool isUser;
+  final String text;
+
+  const _ChatBubble({required this.isUser, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -223,7 +206,7 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         decoration: BoxDecoration(
-          color: isUser ? AgriColors.primary : Colors.white,
+          color: isUser ? _VirtualAssistantPageState._green : Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -232,122 +215,127 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 4,
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: _formatMessageText(text, isUser),
+        child: _FormattedText(text: text, isUser: isUser),
       ),
     );
   }
+}
 
-  Widget _formatMessageText(String text, bool isUser) {
+class _FormattedText extends StatelessWidget {
+  final String text;
+  final bool isUser;
+
+  const _FormattedText({required this.text, required this.isUser});
+
+  @override
+  Widget build(BuildContext context) {
     final style = TextStyle(
-      color: isUser ? Colors.white : AgriColors.textDark,
+      color: isUser ? Colors.white : _VirtualAssistantPageState._title,
       fontSize: 14,
       height: 1.4,
     );
-
-    List<TextSpan> spans = [];
+    final spans = <TextSpan>[];
     final regExp = RegExp(r'(\*\*.*?\*\*|\*.*?\*|\n)');
     final matches = regExp.allMatches(text);
+    var start = 0;
 
-    int start = 0;
     for (final match in matches) {
       if (match.start > start) {
-        spans.add(
-          TextSpan(text: text.substring(start, match.start), style: style),
-        );
+        spans.add(TextSpan(text: text.substring(start, match.start), style: style));
       }
-      final matchStr = match.group(0)!;
-      if (matchStr == '\n') {
+      final token = match.group(0)!;
+      if (token == '\n') {
         spans.add(const TextSpan(text: '\n'));
-      } else if (matchStr.startsWith('**') && matchStr.endsWith('**')) {
+      } else if (token.startsWith('**') && token.endsWith('**')) {
         spans.add(
           TextSpan(
-            text: matchStr.substring(2, matchStr.length - 2),
+            text: token.substring(2, token.length - 2),
             style: style.copyWith(fontWeight: FontWeight.bold),
           ),
         );
-      } else if (matchStr.startsWith('*') && matchStr.endsWith('*')) {
+      } else if (token.startsWith('*') && token.endsWith('*')) {
         spans.add(
           TextSpan(
-            text: matchStr.substring(1, matchStr.length - 1),
+            text: token.substring(1, token.length - 1),
             style: style.copyWith(fontStyle: FontStyle.italic),
           ),
         );
       }
       start = match.end;
     }
+
     if (start < text.length) {
       spans.add(TextSpan(text: text.substring(start), style: style));
     }
 
     return RichText(text: TextSpan(children: spans));
   }
+}
 
-  Widget _buildSuggestions() {
-    final list = [
-      '🌾 Stok padi terbaru',
-      '🏬 Daftar petani mitra',
-      '📦 Cek pesanan saya',
-      '🚜 Panduan fitur',
+class _Suggestions extends StatelessWidget {
+  final ValueChanged<String> onSelected;
+
+  const _Suggestions({required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    const suggestions = [
+      'Stok padi terbaru',
+      'Daftar produk',
+      'Cek pesanan',
+      'Panduan fitur',
     ];
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: 48,
-      child: ListView.builder(
+
+    return SizedBox(
+      height: 52,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         scrollDirection: Axis.horizontal,
-        itemCount: list.length,
-        itemBuilder: (context, idx) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: InkWell(
-              onTap: () {
-                final text = list[idx];
-                final firstSpace = text.indexOf(' ');
-                _sendMessage(firstSpace == -1 ? text : text.substring(firstSpace + 1));
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AgriColors.primary.withValues(alpha: 0.08),
-                  border: Border.all(
-                    color: AgriColors.primary.withValues(alpha: 0.15),
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  list[idx],
-                  style: GoogleFonts.outfit(
-                    color: AgriColors.primary,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+        itemCount: suggestions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final text = suggestions[index];
+          return ActionChip(
+            onPressed: () => onSelected(text),
+            label: Text(text),
+            labelStyle: GoogleFonts.outfit(
+              color: _VirtualAssistantPageState._green,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
             ),
+            backgroundColor: const Color(0xFFD7FBE5),
+            side: BorderSide(
+              color: _VirtualAssistantPageState._green.withValues(alpha: 0.12),
+            ),
+            shape: const StadiumBorder(),
           );
         },
       ),
     );
   }
+}
 
-  Widget _buildInputBar() {
+class _InputBar extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onSubmitted;
+
+  const _InputBar({required this.controller, required this.onSubmitted});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey.shade200)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -359,14 +347,15 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: const Color(0xFFF2F4F7),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: TextField(
-                controller: _inputController,
-                onSubmitted: _sendMessage,
+                controller: controller,
+                onSubmitted: onSubmitted,
                 decoration: const InputDecoration(
                   hintText: 'Tanyakan sesuatu tentang pertanian...',
+                  hintStyle: TextStyle(color: _VirtualAssistantPageState._muted),
                   border: InputBorder.none,
                 ),
                 style: const TextStyle(fontSize: 14),
@@ -375,11 +364,11 @@ class _VirtualAssistantPageState extends State<VirtualAssistantPage> {
           ),
           const SizedBox(width: 8),
           CircleAvatar(
-            backgroundColor: AgriColors.primary,
+            backgroundColor: _VirtualAssistantPageState._green,
             radius: 22,
             child: IconButton(
               icon: const Icon(Icons.send, color: Colors.white, size: 20),
-              onPressed: () => _sendMessage(_inputController.text),
+              onPressed: () => onSubmitted(controller.text),
             ),
           ),
         ],

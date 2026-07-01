@@ -73,6 +73,10 @@ class ApiConstants {
   static const String sellerProfileEndpoint = '/sellers/profile';
   static const String sellerStatisticsEndpoint = '/sellers/statistics';
 
+  // Admin Endpoints
+  static const String adminStatisticsEndpoint = '/admin/statistics';
+  static const String adminUsersEndpoint = '/admin/users';
+
   // Legacy/Deprecated
   static const String commoditiesEndpoint = '/commodities';
   static const String logsEndpoint = '/activity-logs';

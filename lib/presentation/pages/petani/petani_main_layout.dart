@@ -3,6 +3,7 @@ import '../../widgets/agri_bottom_nav_bar.dart';
 import '../shared/virtual_assistant_page.dart';
 import 'p1_beranda_screen.dart';
 import 'p3_jadwal_tanam_screen.dart';
+import 'p4_stok_jual_screen.dart';
 import 'p6_profil_screen.dart';
 
 class PetaniMainLayout extends StatefulWidget {
@@ -13,19 +14,15 @@ class PetaniMainLayout extends StatefulWidget {
 
 class _PetaniMainLayoutState extends State<PetaniMainLayout> {
   int _currentIndex = 0;
+  final List<String> _scheduleNotifications = [];
 
-  late final List<Widget> _pages = [
-    P1BerandaScreen(onOpenTab: _openTab),
-    const P3JadwalTanamScreen(),
-    const VirtualAssistantPage(showBackButton: false, roleContext: 'Petani'),
-    const P6ProfilScreen(),
-  ];
+  late List<Widget> _pages = _buildPages();
 
   final List<AgriBottomNavItem> _navItems = const [
     AgriBottomNavItem(
-      icon: Icons.dashboard_outlined,
-      activeIcon: Icons.dashboard,
-      label: 'Penjualan',
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home,
+      label: 'Beranda',
     ),
     AgriBottomNavItem(
       icon: Icons.calendar_month_outlined,
@@ -33,9 +30,14 @@ class _PetaniMainLayoutState extends State<PetaniMainLayout> {
       label: 'Jadwal',
     ),
     AgriBottomNavItem(
-      icon: Icons.chat_bubble_outline,
-      activeIcon: Icons.chat_bubble,
-      label: 'Chat',
+      icon: Icons.inventory_2_outlined,
+      activeIcon: Icons.inventory_2,
+      label: 'Produk',
+    ),
+    AgriBottomNavItem(
+      icon: Icons.smart_toy_outlined,
+      activeIcon: Icons.smart_toy,
+      label: 'AI',
     ),
     AgriBottomNavItem(
       icon: Icons.person_outline,
@@ -44,8 +46,28 @@ class _PetaniMainLayoutState extends State<PetaniMainLayout> {
     ),
   ];
 
+  List<Widget> _buildPages() {
+    return [
+      P1BerandaScreen(
+        onOpenTab: _openTab,
+        scheduleNotifications: _scheduleNotifications,
+      ),
+      P3JadwalTanamScreen(onScheduleDone: _addScheduleNotification),
+      const P4StokJualScreen(),
+      const VirtualAssistantPage(showBackButton: false, roleContext: 'Petani'),
+      const P6ProfilScreen(),
+    ];
+  }
+
   void _openTab(int index) {
     setState(() => _currentIndex = index);
+  }
+
+  void _addScheduleNotification(String message) {
+    setState(() {
+      _scheduleNotifications.insert(0, message);
+      _pages = _buildPages();
+    });
   }
 
   @override

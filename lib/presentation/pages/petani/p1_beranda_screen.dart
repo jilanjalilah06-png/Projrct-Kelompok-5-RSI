@@ -1,39 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constanst/agri_colors.dart';
+
 import '../../controllers/auth_controller.dart';
 import '../../widgets/order_notifications_sheet.dart';
+import 'commodity_prices_page.dart';
+import 'financial_report_page.dart';
 
-// ─────────────────────────────────────────────
-//  P1 – Beranda (Dashboard Petani)
-// ─────────────────────────────────────────────
 class P1BerandaScreen extends StatelessWidget {
   final ValueChanged<int>? onOpenTab;
+  final List<String> scheduleNotifications;
 
-  const P1BerandaScreen({super.key, this.onOpenTab});
+  const P1BerandaScreen({
+    super.key,
+    this.onOpenTab,
+    this.scheduleNotifications = const [],
+  });
+
+  static const _green = Color(0xFF2D832F);
+  static const _softGreen = Color(0xFFEFF8EF);
+  static const _title = Color(0xFF1F2937);
+  static const _muted = Color(0xFF98A2B3);
+  static const _orange = Color(0xFFEA580C);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AgriColors.background,
+      backgroundColor: _softGreen,
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 24),
           child: Column(
             children: [
-              _buildHeader(context),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildStatGrid(context),
-                    const SizedBox(height: 16),
-                    _buildChartCard(),
-                    const SizedBox(height: 16),
-                    _buildUpcomingSection(context),
-                    const SizedBox(height: 24),
-                  ],
+              _DashboardHeader(notifications: scheduleNotifications),
+              Transform.translate(
+                offset: const Offset(0, -18),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Column(
+                    children: [
+                      const _ShortcutRow(),
+                      const SizedBox(height: 24),
+                      const _FinanceCard(),
+                      const SizedBox(height: 24),
+                      _HarvestEstimateCard(onOpenTab: onOpenTab),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -42,291 +54,130 @@ class P1BerandaScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  // ── Header hijau ──
-  Widget _buildHeader(BuildContext context) {
+class _DashboardHeader extends StatelessWidget {
+  final List<String> notifications;
+
+  const _DashboardHeader({required this.notifications});
+
+  @override
+  Widget build(BuildContext context) {
     final auth = Provider.of<AuthController>(context);
-    final userName = auth.currentUser?.name ?? 'Budi';
+    final userName = auth.currentUser?.name ?? 'Petani';
 
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AgriColors.primaryDark, AgriColors.primary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/logo.png',
-                      height: 28,
-                      errorBuilder: (_, _, _) =>
-                          const Icon(Icons.eco, color: Colors.white, size: 28),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'AgriConnect',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    const OrderNotificationsButton(),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Selamat datang, $userName 👋',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Grid 4 stat kartu ──
-  Widget _buildStatGrid(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.55,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      children: [
-        _StatCard(
-          label: 'Panen Terakhir',
-          value: '120 kg',
-          icon: Icons.grass,
-          iconColor: AgriColors.primaryLight,
-          onTap: () => _showPanenInfo(context),
-        ),
-        _StatCard(
-          label: 'Jadwal Aktif',
-          value: '3',
-          icon: Icons.calendar_today,
-          iconColor: Color(0xFF52B788),
-          onTap: () => onOpenTab?.call(1),
-        ),
-        _StatCard(
-          label: 'Harga Ref.',
-          value: 'Rp 5.2rb',
-          icon: Icons.show_chart,
-          iconColor: Color(0xFF74C69D),
-          onTap: () => _showHargaInfo(context),
-        ),
-        _StatCard(
-          label: 'Stok Jual',
-          value: '80 kg',
-          icon: Icons.inventory_2,
-          iconColor: AgriColors.accent,
-          onTap: () => _showStokInfo(context),
-        ),
-      ],
-    );
-  }
-
-  // ── Grafik Tren Panen (placeholder bar chart) ──
-  Widget _buildChartCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
+      height: 130,
+      padding: const EdgeInsets.fromLTRB(28, 16, 18, 0),
+      color: P1BerandaScreen._green,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Grafik Tren Panen 6 Bulan',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: AgriColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(height: 100, child: _MiniBarChart()),
-          const SizedBox(height: 8),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const [
-              _ChartLabel('Jan'),
-              _ChartLabel('Feb'),
-              _ChartLabel('Mar'),
-              _ChartLabel('Apr'),
-              _ChartLabel('Mei'),
-              _ChartLabel('Jun'),
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.eco_outlined,
+                  color: Colors.white,
+                  size: 29,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'AgriConnect',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              OrderNotificationsButton(
+                badgeColor: const Color(0xFFFF5A66),
+                showBadge: notifications.isNotEmpty,
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  // ── Jadwal Mendatang ──
-  Widget _buildUpcomingSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Jadwal Mendatang',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: AgriColors.textDark,
+          const SizedBox(height: 8),
+          Text(
+            'Selamat datang, $userName!',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.82),
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        _ScheduleItem(
-          icon: Icons.grass,
-          color: AgriColors.primary,
-          title: 'Padi — Sawah A',
-          date: 'Panen: 15 Jun 2026',
-          badge: 'H-7',
-          badgeColor: const Color(0xFFE9C46A),
-          onTap: () => onOpenTab?.call(1),
-        ),
-        const SizedBox(height: 10),
-        _ScheduleItem(
-          icon: Icons.eco,
-          color: const Color(0xFFE9A824),
-          title: 'Jagung — Ladang B',
-          date: 'Panen: 22 Jun 2026',
-          badge: 'Aktif',
-          badgeColor: AgriColors.primaryLight,
-          onTap: () => onOpenTab?.call(1),
-        ),
-      ],
-    );
-  }
-
-  void _showPanenInfo(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (context) => const Padding(
-        padding: EdgeInsets.fromLTRB(20, 8, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Panen Terakhir',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Panen terakhir tercatat 120 kg. Detail panen dapat dikembangkan sebagai halaman laporan terpisah.',
-              style: TextStyle(color: AgriColors.textLight, height: 1.4),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showStokInfo(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (context) => const Padding(
-        padding: EdgeInsets.fromLTRB(20, 8, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Stok Jual',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Stok siap jual saat ini 80 kg. Form input hasil tani tetap tersedia di modul stok jual.',
-              style: TextStyle(color: AgriColors.textLight, height: 1.4),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showHargaInfo(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (context) => const Padding(
-        padding: EdgeInsets.fromLTRB(20, 8, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Harga Referensi',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Harga padi hari ini Rp 5.200/kg. Gunakan data ini sebagai acuan sebelum menerbitkan stok jual.',
-              style: TextStyle(color: AgriColors.textLight, height: 1.4),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
 
-// ─── Stat Card ───────────────────────────────
-class _StatCard extends StatelessWidget {
+class _ShortcutRow extends StatelessWidget {
+  const _ShortcutRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _ShortcutCard(
+            label: 'Lihat',
+            title: 'Harga\nReferensi',
+            icon: Icons.trending_up,
+            iconColor: const Color(0xFF079447),
+            iconBackground: const Color(0xFFD8FBE4),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CommodityPricesPage()),
+            ),
+          ),
+        ),
+        const SizedBox(width: 18),
+        Expanded(
+          child: _ShortcutCard(
+            label: 'Kelola',
+            title: 'Pesanan',
+            icon: Icons.shopping_cart_outlined,
+            iconColor: P1BerandaScreen._orange,
+            iconBackground: const Color(0xFFFFEAD5),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const KelolaPesananPage()),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ShortcutCard extends StatelessWidget {
   final String label;
-  final String value;
+  final String title;
   final IconData icon;
   final Color iconColor;
+  final Color iconBackground;
   final VoidCallback onTap;
-  const _StatCard({
+
+  const _ShortcutCard({
     required this.label,
-    required this.value,
+    required this.title,
     required this.icon,
     required this.iconColor,
+    required this.iconBackground,
     required this.onTap,
   });
 
@@ -334,196 +185,198 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(20),
+      elevation: 3,
+      shadowColor: Colors.black.withValues(alpha: 0.16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+        borderRadius: BorderRadius.circular(20),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 170;
+            final iconSize = compact ? 46.0 : 60.0;
+            final titleSize = compact ? 18.0 : 21.0;
+            final labelSize = compact ? 15.0 : 17.0;
+
+            return Container(
+              height: 132,
+              padding: EdgeInsets.fromLTRB(
+                compact ? 14 : 22,
+                20,
+                compact ? 10 : 16,
+                18,
               ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: iconColor, size: 18),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AgriColors.textDark,
+                  Container(
+                    width: iconSize,
+                    height: iconSize,
+                    decoration: BoxDecoration(
+                      color: iconBackground,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      icon,
+                      color: iconColor,
+                      size: compact ? 25 : 31,
                     ),
                   ),
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AgriColors.textLight,
+                  SizedBox(width: compact ? 9 : 14),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: P1BerandaScreen._muted,
+                            fontSize: labelSize,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: P1BerandaScreen._title,
+                            fontSize: titleSize,
+                            height: 1.18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-// ─── Mini Bar Chart ───────────────────────────
-class _MiniBarChart extends StatelessWidget {
-  final List<double> values = const [45, 70, 55, 90, 65, 80];
+class _FinanceCard extends StatelessWidget {
+  const _FinanceCard();
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final barWidth = (constraints.maxWidth - 60) / 6;
-        final maxVal = values.reduce((a, b) => a > b ? a : b);
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: values.map((v) {
-            final h = (v / maxVal) * constraints.maxHeight;
-            return Container(
-              width: barWidth * 0.65,
-              height: h,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AgriColors.primaryLight, AgriColors.primary],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                ),
-                borderRadius: BorderRadius.circular(6),
-              ),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-}
+    void openReport() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const FinancialReportPage()),
+      );
+    }
 
-class _ChartLabel extends StatelessWidget {
-  final String text;
-  const _ChartLabel(this.text);
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(fontSize: 10, color: AgriColors.textLight),
-    );
-  }
-}
-
-// ─── Schedule Item ────────────────────────────
-class _ScheduleItem extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String date;
-  final String badge;
-  final Color badgeColor;
-  final VoidCallback onTap;
-  const _ScheduleItem({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.date,
-    required this.badge,
-    required this.badgeColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
+        onTap: openReport,
+        borderRadius: BorderRadius.circular(22),
+        child: _DashboardCard(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+          child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AgriColors.textDark,
+              const Row(
+                children: [
+                  Icon(
+                    Icons.account_balance_wallet_outlined,
+                    color: Color(0xFF079447),
+                    size: 24,
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Laporan Keuangan',
+                      style: TextStyle(
+                        color: P1BerandaScreen._title,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    Text(
-                      date,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AgriColors.textLight,
-                      ),
+                  ),
+                  Text(
+                    'Jun 2026',
+                    style: TextStyle(
+                      color: P1BerandaScreen._muted,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
+              const SizedBox(height: 20),
+              const Row(
+                children: [
+                  Expanded(
+                    child: _FinanceMetric(
+                      label: 'Total Penjualan',
+                      value: 'Rp 3.420.000',
+                      valueColor: Color(0xFF07883E),
+                      background: Color(0xFFEAF8EE),
+                    ),
+                  ),
+                  SizedBox(width: 18),
+                  Expanded(
+                    child: _FinanceMetric(
+                      label: 'Total Biaya',
+                      value: 'Rp 1.850.000',
+                      valueColor: Color(0xFFFF2732),
+                      background: Color(0xFFFFEFEF),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Align(
+                alignment: Alignment.centerLeft,
                 child: Text(
-                  badge,
+                  'Penjualan 6 Bulan',
                   style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: badgeColor == const Color(0xFFE9C46A)
-                        ? const Color(0xFF9A6E00)
-                        : AgriColors.primary,
+                    color: Color(0xFF667085),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const SizedBox(height: 92, child: _LineChart()),
+              const SizedBox(height: 6),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _MonthLabel(''),
+                  _MonthLabel('Feb'),
+                  _MonthLabel('Mar'),
+                  _MonthLabel('Apr'),
+                  _MonthLabel('Mei'),
+                  _MonthLabel('Jun'),
+                ],
+              ),
+              const SizedBox(height: 28),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: openReport,
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF00A63E),
+                    textStyle: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Lihat detail'),
+                      SizedBox(width: 4),
+                      Icon(Icons.chevron_right, size: 22),
+                    ],
                   ),
                 ),
               ),
@@ -531,6 +384,316 @@ class _ScheduleItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _FinanceMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color valueColor;
+  final Color background;
+
+  const _FinanceMetric({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    required this.background,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 102,
+      padding: const EdgeInsets.fromLTRB(18, 16, 10, 14),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF667085),
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: TextStyle(
+                color: valueColor,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LineChart extends StatelessWidget {
+  const _LineChart();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _LineChartPainter(),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _LineChartPainter extends CustomPainter {
+  final List<double> values = const [42, 55, 36, 69, 54, 82];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path();
+    final fillPath = Path();
+    final widthStep = size.width / (values.length - 1);
+    final maxValue = values.reduce((a, b) => a > b ? a : b);
+    final minValue = values.reduce((a, b) => a < b ? a : b);
+
+    Offset pointFor(int index) {
+      final normalized = (values[index] - minValue) / (maxValue - minValue);
+      return Offset(index * widthStep, size.height - (normalized * 52) - 18);
+    }
+
+    final first = pointFor(0);
+    path.moveTo(first.dx, first.dy);
+    fillPath.moveTo(first.dx, size.height);
+    fillPath.lineTo(first.dx, first.dy);
+
+    for (var i = 1; i < values.length; i++) {
+      final current = pointFor(i);
+      final previous = pointFor(i - 1);
+      final controlX = previous.dx + (current.dx - previous.dx) / 2;
+      path.cubicTo(
+        controlX,
+        previous.dy,
+        controlX,
+        current.dy,
+        current.dx,
+        current.dy,
+      );
+      fillPath.cubicTo(
+        controlX,
+        previous.dy,
+        controlX,
+        current.dy,
+        current.dx,
+        current.dy,
+      );
+    }
+
+    fillPath
+      ..lineTo(size.width, size.height)
+      ..close();
+
+    final fillPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0x332D832F), Color(0x00FFFFFF)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    final linePaint = Paint()
+      ..color = P1BerandaScreen._green
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawPath(fillPath, fillPaint);
+    canvas.drawPath(path, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _MonthLabel extends StatelessWidget {
+  final String label;
+
+  const _MonthLabel(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 44,
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: P1BerandaScreen._muted,
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _HarvestEstimateCard extends StatelessWidget {
+  final ValueChanged<int>? onOpenTab;
+
+  const _HarvestEstimateCard({required this.onOpenTab});
+
+  @override
+  Widget build(BuildContext context) {
+    const harvests = [
+      ('Padi - Sawah A', 'Panen: 30 Jun 2026'),
+      ('Padi - Sawah B', 'Panen: 14 Jul 2026'),
+      ('Jagung - Kebun A', 'Panen: 01 Jul 2026'),
+      ('Jagung - Kebun B', 'Panen: 10 Jul 2026'),
+    ];
+
+    return _DashboardCard(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+      child: Column(
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.eco_outlined, color: Color(0xFF079447), size: 25),
+              SizedBox(width: 10),
+              Text(
+                'Estimasi Panen',
+                style: TextStyle(
+                  color: P1BerandaScreen._title,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          for (var i = 0; i < harvests.length; i++) ...[
+            _HarvestRow(
+              title: harvests[i].$1,
+              date: harvests[i].$2,
+              onTap: () => onOpenTab?.call(1),
+            ),
+            if (i != harvests.length - 1)
+              Divider(
+                height: 18,
+                thickness: 1,
+                color: Colors.black.withValues(alpha: 0.04),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HarvestRow extends StatelessWidget {
+  final String title;
+  final String date;
+  final VoidCallback onTap;
+
+  const _HarvestRow({
+    required this.title,
+    required this.date,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: P1BerandaScreen._title,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    date,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: P1BerandaScreen._muted,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 58,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF1B8),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'H-7',
+                style: TextStyle(
+                  color: P1BerandaScreen._orange,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  const _DashboardCard({required this.child, required this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.11),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

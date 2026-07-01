@@ -2,6 +2,7 @@ class CategoryModel {
   final int id;
   final String name;
   final String? description;
+  final int productsCount;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -9,6 +10,7 @@ class CategoryModel {
     required this.id,
     required this.name,
     this.description,
+    this.productsCount = 0,
     this.createdAt,
     this.updatedAt,
   });
@@ -18,6 +20,7 @@ class CategoryModel {
       id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String?,
+      productsCount: json['products_count'] as int? ?? 0,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -32,6 +35,7 @@ class CategoryModel {
       'id': id,
       'name': name,
       'description': description,
+      'products_count': productsCount,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
@@ -41,6 +45,7 @@ class CategoryModel {
     int? id,
     String? name,
     String? description,
+    int? productsCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -48,6 +53,7 @@ class CategoryModel {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      productsCount: productsCount ?? this.productsCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

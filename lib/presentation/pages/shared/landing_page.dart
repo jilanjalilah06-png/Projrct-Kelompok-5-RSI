@@ -1501,7 +1501,7 @@ class _LandingPageState extends State<LandingPage> {
                           _buildContactCard(
                             icon: '💬',
                             label: 'WhatsApp',
-                            value: '+62 812-3456-7890',
+                            value: '+62 856-5820-2442',
                             isLink: true,
                             onTap: () => _launchWhatsApp(context),
                           ),
@@ -1530,7 +1530,7 @@ class _LandingPageState extends State<LandingPage> {
                             child: _buildContactCard(
                               icon: '💬',
                               label: 'WhatsApp',
-                              value: '+62 812-3456-7890',
+                              value: '+62 856-5820-2442',
                               isLink: true,
                               onTap: () => _launchWhatsApp(context),
                             ),
@@ -1628,7 +1628,7 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Future<void> _launchWhatsApp(BuildContext context) async {
-    final uri = Uri.https('wa.me', '/6281234567890', {
+    final uri = Uri.https('wa.me', '/6285658202442', {
       'text': 'Halo AgriConnect, saya ingin bertanya.',
     });
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);

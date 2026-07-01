@@ -9,6 +9,8 @@ class ProductModel {
   final String? image;
   final String unit;
   final bool isActive;
+  final Map<String, dynamic>? seller;
+  final Map<String, dynamic>? category;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -23,6 +25,8 @@ class ProductModel {
     this.image,
     required this.unit,
     required this.isActive,
+    this.seller,
+    this.category,
     this.createdAt,
     this.updatedAt,
   });
@@ -33,14 +37,14 @@ class ProductModel {
       sellerId: json['seller_id'] as int,
       categoryId: json['category_id'] as int,
       name: json['name'] as String,
-      description: json['description'] as String,
-      price: (json['price'] is int)
-          ? (json['price'] as int).toDouble()
-          : json['price'] as double,
+      description: json['description'] as String? ?? '',
+      price: _toDouble(json['price']),
       stock: json['stock'] as int,
       image: json['image'] as String?,
       unit: json['unit'] as String,
       isActive: json['is_active'] as bool? ?? true,
+      seller: json['seller'] as Map<String, dynamic>?,
+      category: json['category'] as Map<String, dynamic>?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -62,6 +66,8 @@ class ProductModel {
       'image': image,
       'unit': unit,
       'is_active': isActive,
+      'seller': seller,
+      'category': category,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
@@ -78,6 +84,8 @@ class ProductModel {
     String? image,
     String? unit,
     bool? isActive,
+    Map<String, dynamic>? seller,
+    Map<String, dynamic>? category,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -92,8 +100,17 @@ class ProductModel {
       image: image ?? this.image,
       unit: unit ?? this.unit,
       isActive: isActive ?? this.isActive,
+      seller: seller ?? this.seller,
+      category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+}
+
+double _toDouble(dynamic value) {
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0;
+  return 0;
 }
