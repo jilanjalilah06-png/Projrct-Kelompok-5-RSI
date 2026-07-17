@@ -1,0 +1,24 @@
+be/vendor/
+be/node_modules/
+be/.env
+be/storage/logs/
+be/storage/framework/cache/
+be/storage/framework/sessions/
+be/storage/framework/views/
+be/bootstrap/cache/
+be/public/storage/
+
+# Flutter (fe)
+fe/build/
+fe/.dart_tool/
+fe/.flutter-plugins
+fe/.flutter-plugins-dependencies
+fe/.packages
+
+# Database
+mysql_data/
+
+# Docker & OS
+*.log
+.DS_Store
+Thumbs.db

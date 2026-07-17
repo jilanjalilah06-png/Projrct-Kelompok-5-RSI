@@ -1,0 +1,84 @@
+<<<<<<< HEAD
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+=======
+# Local environment secrets
+**/.env
+**/.env.*
+!**/.env.example
+be/file.env
+
+# Dependency folders
+be/vendor/
+**/node_modules/
+
+# Laravel runtime/cache
+be/storage/*.key
+be/storage/logs/*
+be/storage/framework/cache/*
+be/storage/framework/sessions/*
+be/storage/framework/views/*
+be/bootstrap/cache/*.php
+be/.phpunit.result.cache
+
+# Flutter/Dart generated files
+fe/.dart_tool/
+fe/build/
+fe/**/build/
+fe/.flutter-plugins
+fe/.flutter-plugins-dependencies
+fe/**/Flutter/.last_build_id
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Nested git backup created while converting this folder to a root repo
+.fe-git-backup/
+>>>>>>> 25f0557ff98f3d7ec9f4727e4922e3e466d63091
