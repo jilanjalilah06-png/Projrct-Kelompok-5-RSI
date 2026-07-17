@@ -113,4 +113,8 @@ project-root/
 │   ├── web-admin/
 │   └── backend/
 │
+<<<<<<< HEAD
 └── README.md
+=======
+└── README.md
+>>>>>>> 0ae848498cf9379632701ebced3da4f8d393de2d
