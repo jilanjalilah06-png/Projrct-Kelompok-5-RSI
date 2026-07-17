@@ -130,23 +130,30 @@ AgriConnect hadir sebagai solusi digital untuk membantu proses pertanian menjadi
 ## 📂 Struktur Folder
 
 ```
-Projrct-Kelompok-5/
-│
-├── docs/
-│   ├── SRS.docx
-│   ├── ERD.png
-│   ├── DFD.png
-│   └── UseCase.png
-│
-├── design/
-│   ├── wireframe/
-│   └── mockup/
+AgriConnect/
 │
 ├── be/                     # Backend - Laravel REST API + Sanctum
-│   └── .env.example
+│   ├── app/                # Logika bisnis backend (Controller, Model, Middleware)
+│   ├── config/             # Konfigurasi Laravel
+│   ├── database/           # Migrasi & Seeder Database
+│   └── routes/             # Defini rute API
 │
-├── fe/                     # Web / Landing Page - PHP (Laravel Blade)
+├── docs/                   # Dokumen Project & Screenshots
+│   ├── screenshots/        # Tangkapan layar aplikasi untuk README
+│   └── srs kel 5...        # Dokumen SRS (Software Requirements Specification)
 │
+├── fe/                     # Frontend (Duplikat repositori aplikasi Flutter)
+│
+# 📱 Struktur Utama Aplikasi Mobile & Web (Flutter) di Root:
+├── android/                # Konfigurasi platform Android
+├── ios/                    # Konfigurasi platform iOS
+├── assets/                 # Aset gambar & icon aplikasi
+├── lib/                    # Source code utama aplikasi Flutter (Dart)
+│   ├── core/               # Nilai konstan & utilitas global
+│   ├── data/               # Repositori & koneksi API (Data Layer)
+│   └── presentation/       # UI Pages (Admin, Pembeli, Petani) & Widgets (Presentation Layer)
+├── test/                   # Berkas testing aplikasi
+├── pubspec.yaml            # File manajemen dependensi Flutter
 └── README.md
 ```
 
