@@ -63,25 +63,25 @@ AgriConnect hadir sebagai solusi digital untuk membantu proses pertanian menjadi
 ### 📱 Mobile App
 
 **Halaman Login**
-![Login Page](docs/screenshots/mobile-login.jpg)
+![Login Page](docs/screenshots/login_page.jpg)
 *Halaman awal aplikasi dengan opsi Login dan Daftar Sekarang*
 
 **Beranda Pembeli**
-![Beranda Pembeli](docs/screenshots/mobile-beranda-pembeli.jpg)
+![Beranda Pembeli](docs/screenshots/beranda_pembeli.jpg)
 *Beranda untuk pembeli menampilkan pencarian produk, promo, dan daftar produk tersedia (Beras & Jagung) lengkap dengan harga dan rating*
 
 **Daftar Produk (Petani)**
-![Daftar Produk Petani](docs/screenshots/mobile-daftar-produk-petani.jpg)
+![Daftar Produk Petani](docs/screenshots/daftar_produk_petani.jpg)
 *Halaman manajemen produk untuk petani — menampilkan stok, harga, status publikasi, dan opsi edit produk*
 
 ### 💻 Web Admin
 
 **Dashboard Admin**
-![Dashboard Admin](docs/screenshots/web-dashboard-admin.jpg)
+![Dashboard Admin](docs/screenshots/we_dashboard_admin.jpg)
 *Dashboard menampilkan ringkasan total petani aktif, total pembeli, transaksi bulan ini, pesanan diproses, komisi admin, dan aktivitas terbaru platform*
 
 **Profil Petani**
-![Profil Petani](docs/screenshots/web-profil-petani.jpg)
+![Profil Petani](docs/screenshots/profile_petani.jpg)
 *Halaman profil petani menampilkan data diri, kontak, lokasi, pengaturan notifikasi, dan status verifikasi akun*
 
 ---
